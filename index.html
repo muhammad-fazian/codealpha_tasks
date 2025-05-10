@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Age Calculator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Age Calculator</h1>
+        <p class="subtitle">Enter your date of birth to calculate your precise age</p>
+        
+        <div class="input-group">
+            <div class="input-field">
+                <label for="day">Day</label>
+                <input type="number" id="day" placeholder="DD" min="1" max="31">
+                <p class="error" id="day-error"></p>
+            </div>
+            
+            <div class="input-field">
+                <label for="month">Month</label>
+                <input type="number" id="month" placeholder="MM" min="1" max="12">
+                <p class="error" id="month-error"></p>
+            </div>
+            
+            <div class="input-field">
+                <label for="year">Year</label>
+                <input type="number" id="year" placeholder="YYYY" min="1900">
+                <p class="error" id="year-error"></p>
+            </div>
+        </div>
+        
+        <button id="calculate-btn">Calculate Age</button>
+        
+        <div class="result" id="result">
+            <h2>Your age is:</h2>
+            <div class="age-display">
+                <div class="age-unit">
+                    <div class="age-value" id="years">--</div>
+                    <div class="age-label">Years</div>
+                </div>
+                
+                <div class="age-unit">
+                    <div class="age-value" id="months">--</div>
+                    <div class="age-label">Months</div>
+                </div>
+                
+                <div class="age-unit">
+                    <div class="age-value" id="days">--</div>
+                    <div class="age-label">Days</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="separator"></div>
+        
+        <p class="footer">This calculation is based on the Gregorian calendar system.</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dayInput = document.getElementById('day');
+            const monthInput = document.getElementById('month');
+            const yearInput = document.getElementById('year');
+            const calculateBtn = document.getElementById('calculate-btn');
+            const resultDiv = document.getElementById('result');
+            
+            const dayError = document.getElementById('day-error');
+            const monthError = document.getElementById('month-error');
+            const yearError = document.getElementById('year-error');
+            
+            const yearsResult = document.getElementById('years');
+            const monthsResult = document.getElementById('months');
+            const daysResult = document.getElementById('days');
+            
+            calculateBtn.addEventListener('click', calculateAge);
+            
+            function calculateAge() {
+                // Reset errors
+                resetErrors();
+                
+                // Get input values
+                const day = parseInt(dayInput.value);
+                const month = parseInt(monthInput.value);
+                const year = parseInt(yearInput.value);
+                
+                // Validate inputs
+                let hasErrors = false;
+                
+                if (!dayInput.value) {
+                    showError(dayInput, dayError, 'Day is required');
+                    hasErrors = true;
+                } else if (day < 1 || day > 31) {
+                    showError(dayInput, dayError, 'Must be a valid day');
+                    hasErrors = true;
+                }
+                
+                if (!monthInput.value) {
+                    showError(monthInput, monthError, 'Month is required');
+                    hasErrors = true;
+                } else if (month < 1 || month > 12) {
+                    showError(monthInput, monthError, 'Must be a valid month');
+                    hasErrors = true;
+                }
+                
+                if (!yearInput.value) {
+                    showError(yearInput, yearError, 'Year is required');
+                    hasErrors = true;
+                } else if (year > new Date().getFullYear()) {
+                    showError(yearInput, yearError, 'Must be in the past');
+                    hasErrors = true;
+                }
+                
+                // Check if date is valid (e.g., no February 30th)
+                if (!hasErrors) {
+                    const inputDate = new Date(year, month - 1, day);
+                    if (
+                        inputDate.getDate() !== day ||
+                        inputDate.getMonth() !== month - 1 ||
+                        inputDate.getFullYear() !== year
+                    ) {
+                        showError(dayInput, dayError, 'Must be a valid date');
+                        hasErrors = true;
+                    }
+                }
+                
+                // If there are errors, don't calculate age
+                if (hasErrors) {
+                    resultDiv.style.display = 'none';
+                    return;
+                }
+                
+                // Calculate age
+                const birthDate = new Date(year, month - 1, day);
+                const today = new Date();
+                
+                let years = today.getFullYear() - birthDate.getFullYear();
+                let months = today.getMonth() - birthDate.getMonth();
+                let days = today.getDate() - birthDate.getDate();
+                
+                // Adjust if current day is less than birth day
+                if (days < 0) {
+                    // Get the last day of the previous month
+                    const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
+                    days += lastMonth.getDate();
+                    months--;
+                }
+                
+                // Adjust if current month is less than birth month
+                if (months < 0) {
+                    months += 12;
+                    years--;
+                }
+                
+                // Display result
+                yearsResult.textContent = years;
+                monthsResult.textContent = months;
+                daysResult.textContent = days;
+                resultDiv.style.display = 'block';
+            }
+            
+            function showError(input, errorElement, message) {
+                input.classList.add('error-input');
+                errorElement.textContent = message;
+            }
+            
+            function resetErrors() {
+                // Reset all error messages
+                dayInput.classList.remove('error-input');
+                monthInput.classList.remove('error-input');
+                yearInput.classList.remove('error-input');
+                
+                dayError.textContent = '';
+                monthError.textContent = '';
+                yearError.textContent = '';
+            }
+        });
+    </script>
+</body>
+</html>
